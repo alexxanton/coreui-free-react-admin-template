@@ -1,91 +1,68 @@
-import React, { useEffect, useState, createRef } from 'react'
-import PropTypes from 'prop-types'
-import classNames from 'classnames'
-import { CRow, CCol, CCard, CCardHeader, CCardBody } from '@coreui/react'
-import { rgbToHex } from '@coreui/utils'
-import { DocsLink } from 'src/components'
+import React, { useEffect, useState } from 'react'
+import { CButton, CImage, CSpinner } from '@coreui/react'
+import axios from 'axios'
 
-const ThemeView = () => {
-  const [color, setColor] = useState('rgb(255, 255, 255)')
-  const ref = createRef()
+
+const randomMeme = "https://meme-api.com/gimme"
+
+const Meme = () => {
+  const [meme, setMeme] = useState()
+  const [loading, setLoading] = useState(true)
+
+  const getRandomMeme = () => {
+    setLoading(true)
+    axios.get(randomMeme).then((response) => {
+      setMeme(response.data)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+    .finally(() => {
+      setLoading(false)
+    })
+  }
 
   useEffect(() => {
-    const el = ref.current.parentNode.firstChild
-    const varColor = window.getComputedStyle(el).getPropertyValue('background-color')
-    setColor(varColor)
-  }, [ref])
+    getRandomMeme()
+  }, [])
 
-  return (
-    <table className="table w-100" ref={ref}>
-      <tbody>
-        <tr>
-          <td className="text-body-secondary">HEX:</td>
-          <td className="font-weight-bold">{rgbToHex(color)}</td>
-        </tr>
-        <tr>
-          <td className="text-body-secondary">RGB:</td>
-          <td className="font-weight-bold">{color}</td>
-        </tr>
-      </tbody>
-    </table>
-  )
-}
-
-const ThemeColor = ({ className, children }) => {
-  const classes = classNames(className, 'theme-color w-75 rounded mb-3')
-  return (
-    <CCol xs={12} sm={6} md={4} xl={2} className="mb-4">
-      <div className={classes} style={{ paddingTop: '75%' }}></div>
-      {children}
-      <ThemeView />
-    </CCol>
-  )
-}
-
-ThemeColor.propTypes = {
-  children: PropTypes.node,
-  className: PropTypes.string,
-}
-
-const Colors = () => {
+  // display the meme or a spinner if not loaded
   return (
     <>
-      <CCard className="mb-4">
-        <CCardHeader>
-          Theme colors
-          <DocsLink href="https://coreui.io/docs/utilities/colors/" />
-        </CCardHeader>
-        <CCardBody>
-          <CRow>
-            <ThemeColor className="bg-primary">
-              <h6>Brand Primary Color</h6>
-            </ThemeColor>
-            <ThemeColor className="bg-secondary">
-              <h6>Brand Secondary Color</h6>
-            </ThemeColor>
-            <ThemeColor className="bg-success">
-              <h6>Brand Success Color</h6>
-            </ThemeColor>
-            <ThemeColor className="bg-danger">
-              <h6>Brand Danger Color</h6>
-            </ThemeColor>
-            <ThemeColor className="bg-warning">
-              <h6>Brand Warning Color</h6>
-            </ThemeColor>
-            <ThemeColor className="bg-info">
-              <h6>Brand Info Color</h6>
-            </ThemeColor>
-            <ThemeColor className="bg-light">
-              <h6>Brand Light Color</h6>
-            </ThemeColor>
-            <ThemeColor className="bg-dark">
-              <h6>Brand Dark Color</h6>
-            </ThemeColor>
-          </CRow>
-        </CCardBody>
-      </CCard>
+      {loading ? (
+        <CSpinner style={styles.spinner} color="primary" />
+      ) : (
+        meme && (
+          <CImage
+            src={meme.url}
+            alt="Meme"
+            style={styles.image}
+          />
+        )
+      )}
+      <CButton color="primary" onClick={getRandomMeme} style={styles.button}>
+        Click to see another meme
+      </CButton>
     </>
   )
 }
 
-export default Colors
+const styles = {
+  image: {
+    width: "60%",
+    paddingBottom: "25px"
+  },
+  button: {
+    width: "25%",
+    position: "fixed",
+    right: 0,
+    marginRight: "20px"
+  },
+  spinner: {
+    position: "fixed",
+    top: "50%",
+    left: "30%"
+  }
+}
+
+export default Meme
