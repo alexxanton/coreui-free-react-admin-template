@@ -61,7 +61,7 @@ const styles = {
   spinner: {
     position: "fixed",
     top: "50%",
-    left: "30%"
+    left: "42.5%"
   }
 }
 
